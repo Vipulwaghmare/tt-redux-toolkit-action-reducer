@@ -5,8 +5,6 @@ const Counter = () => {
   const counter = useSelector((state) => state.counter);
   const dispatch = useDispatch();
 
-  console.log(counter);
-
   return (
     <div className="counter">
       <h2>Counter</h2>

@@ -1,5 +1,4 @@
-import { createAction, createReducer } from "@reduxjs/toolkit";
-import { giveMeId } from "utils/helpers";
+import { createAction, createReducer, nanoid } from "@reduxjs/toolkit";
 
 const initialState = {
   todos: [],
@@ -12,38 +11,55 @@ export const selectTodo = createAction("SELECT_TODO");
 export const deleteTodo = createAction("DELETE_TODO");
 export const toggleTodo = createAction("TOGGLE_TODO");
 
+// Builder Notation
+
 const todosReducer = createReducer(initialState, (builder) => {
   builder
-    .addCase(createToDo.type, (state, { payload }) => {
+    .addCase(createToDo, (state, { payload }) => {
       state.todos.push({
-        id: giveMeId(),
+        id: nanoid(),
         isComplete: false,
         title: payload,
       });
     })
-    .addCase(editTodo.type, (state, { payload }) => {
-      state.todos = state.todos.map((todo) => {
-        if (todo.id === payload.id) {
-          return { ...todo, ...payload };
-        }
-        return todo;
-      });
+    .addCase(selectTodo, (state, { payload }) => {
+      state.selected =
+        payload === null ? null : { ...state.todos[payload], index: payload };
     })
-    .addCase(selectTodo.type, (state, { payload }) => {
-      state.selected = state.todos.find((todo) => todo.id === payload) || null;
+    .addCase(editTodo, (state, { payload }) => {
+      state.todos[payload.index]["title"] = payload.title;
     })
-    .addCase(deleteTodo.type, (state, { payload }) => {
+    .addCase(deleteTodo, (state, { payload }) => {
       state.todos = state.todos.filter((todo) => todo.id !== payload);
     })
-    .addCase(toggleTodo.type, (state, { payload }) => {
-      state.todos = state.todos.map((todo) => {
-        if (todo.id !== payload) return todo;
-        return {
-          ...todo,
-          isComplete: !todo.isComplete,
-        };
-      });
+    .addCase(toggleTodo, (state, { payload }) => {
+      state.todos[payload]["isComplete"] = !state.todos[payload]["isComplete"];
     });
 });
+
+// Map Notation
+
+// const todosReducer = createReducer(initialState, {
+//   [createToDo]: (state, { payload }) => {
+//     state.todos.push({
+//       id: nanoid(),
+//       isComplete: false,
+//       title: payload,
+//     });
+//   },
+//   [selectTodo]: (state, { payload }) => {
+//     state.selected =
+//       payload === null ? null : { ...state.todos[payload], index: payload };
+//   },
+//   [editTodo]: (state, { payload }) => {
+//     state.todos[payload.index]["title"] = payload.title;
+//   },
+//   [deleteTodo]: (state, { payload }) => {
+//     state.todos = state.todos.filter((todo) => todo.id !== payload);
+//   },
+//   [toggleTodo]: (state, { payload }) => {
+//     state.todos[payload]["isComplete"] = !state.todos[payload]["isComplete"];
+//   },
+// });
 
 export default todosReducer;
